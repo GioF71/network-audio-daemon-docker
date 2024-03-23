@@ -79,6 +79,8 @@ Check the gid of the group `audio` using this command:
 
 `getent group audio`
 
+then modify the `docker run` commands accordingly.
+
 ### Using docker compose
 
 Example compose file:
