@@ -1,6 +1,6 @@
 # network-audio-daemon-docker
 
-A docker container for network-audio-adapter by [signalyst](https://www.signalyst.com/index.html).  
+A docker image for network-audio-adapter by [signalyst](https://www.signalyst.com/index.html).  
 
 ## References
 
