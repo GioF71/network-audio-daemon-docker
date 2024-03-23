@@ -6,8 +6,8 @@ A docker image for network-audio-adapter by [signalyst](https://www.signalyst.co
 
 NAME|LINK
 :---|:---
-Main website|[Website](https://www.signalyst.com/)
-Consumer Products|[Link](https://www.signalyst.com/consumer.html)
+Signalyst Main website|[Website](https://www.signalyst.com/)
+Signalyst Consumer Products|[Link](https://www.signalyst.com/consumer.html)
 
 ## Links
 
