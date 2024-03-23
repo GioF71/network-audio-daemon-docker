@@ -54,13 +54,24 @@ NAA_NAME|Player name, defaults to an empty string
 You can run the container by typing:
 
 ```sh
-docker run -d --name network-audio-daemon --network=host --device /dev/snd -e NAA_NAME=D10 giof71/network-audio-daemon
+docker run -d \
+  --name network-audio-daemon \
+  --network=host \
+  --device /dev/snd \
+  -e NAA_NAME=D10 \
+  giof71/network-audio-daemon
 ```
 
 It is possible to run the container using a specific uid:gid:
 
 ```sh
-docker run -d --name network-audio-daemon --user "1000:29" --network=host --device /dev/snd -e NAA_NAME=D10 giof71/network-audio-daemon
+docker run -d \
+  --name network-audio-daemon \
+  --user "1000:29" \
+  --network=host \
+  --device /dev/snd \
+  -e NAA_NAME=D10 \
+  giof71/network-audio-daemon
 ```
 
 I am using uid 1000 and gid 29 which corresponds, on my system, to the `audio` group.  
