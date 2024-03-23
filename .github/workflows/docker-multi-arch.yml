@@ -39,7 +39,7 @@ jobs:
           build_platforms="linux/amd64,linux/arm64/v8,linux/arm/v7"
 
           declare -A base_image_from_matrix
-          base_image_from_matrix[stable]=debian:bookworm-slim
+          base_image_from_matrix[bookworm]=debian:bookworm-slim
 
           select_base_image=${base_image_from_matrix[${{ matrix.base }}]}
           if [ -z "${select_base_image}" ]; then
