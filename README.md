@@ -13,7 +13,7 @@ Consumer Products|[Link](https://www.signalyst.com/consumer.html)
 
 REPOSITORY TYPE|LINK
 :---|:---
-Git Repository|[Repo](https://github.com/GioF71/network-audio-daemon-docker.git)
+Git Repository|[GitHub](https://github.com/GioF71/network-audio-daemon-docker.git)
 Docker Images|[Docker Hub](https://hub.docker.com/repository/docker/giof71/network-audio-daemon)
 
 ## Build
