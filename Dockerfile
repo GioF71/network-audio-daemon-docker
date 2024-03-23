@@ -1,4 +1,5 @@
-FROM debian:bookworm-slim
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE:-debian:bookworm-slim} AS BASE
 
 # https://www.signalyst.eu/bins/naa/linux/bookworm/networkaudiod_5.0.0-59_armhf.deb
 # https://www.signalyst.eu/bins/naa/linux/bookworm/networkaudiod_5.0.0-59_arm64.deb

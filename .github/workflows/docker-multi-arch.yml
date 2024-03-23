@@ -1,0 +1,119 @@
+name: Publish Regular multi-arch Docker images
+
+on:
+  push:
+    tags:
+      - "release/*"
+      - "feature/*"
+      - "daily/*"
+      - "v*" # release
+      - "f*" # feature
+      - "d*" # daily
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        base: [ bookworm ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare for docker build
+        id: prepare
+        run: |
+          image_name=${{secrets.DOCKER_USERNAME}}/network-audio-daemon
+
+          ref_type=${{ github.ref_type }}
+          echo "REF_TYPE: ["$ref_type"]"
+
+          ref_name=${{ github.ref_name }}
+          echo "REF_NAME: ["$ref_name"]"
+
+          ref=${{ github.ref }}
+          echo "REF: ["$ref"]"
+
+          build_platforms="linux/amd64,linux/arm64/v8,linux/arm/v7"
+
+          declare -A base_image_from_matrix
+          base_image_from_matrix[stable]=debian:bookworm-slim
+
+          select_base_image=${base_image_from_matrix[${{ matrix.base }}]}
+          if [ -z "${select_base_image}" ]; then
+            echo "Cannot find base image for [${{ matrix.base }}]"
+            exit 1
+          fi
+          echo "Select Base Image [" $select_base_image "]"
+
+          declare -A distro_friendly_name_dict
+          distro_friendly_name_dict[bookworm]=debian
+
+          distro_friendly_name=${{ matrix.base }}
+          binary_mode=${{ matrix.binary_mode }}
+          lookup_distro_name=${distro_friendly_name_dict[${{ matrix.base }}]}
+          if [ -n "${lookup_distro_name}" ]; then
+            distro_friendly_name=$lookup_distro_name
+          fi
+
+          tags=""
+          if [ "${ref_type}" = "tag" ]; then
+            echo "tag mode"
+            echo "tag is ["${ref_name}"]"
+            if [[ "${ref_name}" = *"/"* ]]; then
+              tag_type=$(echo ${ref_name} | cut -d '/' -f 1)
+              tag_name=$(echo ${ref_name} | cut -d '/' -f 2) 
+            else
+              if [[ "${ref_name}" = "v"* || "${ref_name}" = "f"* || "${ref_name}" = "d"* ]]; then
+                tag_type=${ref_name:0:1}
+                tag_name=${ref_name:1}
+              fi
+            fi
+            echo "tag_type=[$tag_type]"
+            echo "tag_name=[$tag_name]"
+            if [[ "${tag_type}" == "release" || "${tag_type}" == "v" ]]; then
+              echo "release tag"
+              tags="${tags},$image_name:${distro_friendly_name}"
+              tags="${tags},${image_name}:${tag_name}-${distro_friendly_name}"
+              tags="${tags},${image_name}:latest"
+            elif [[ "${tag_type}" == "feature" || "${tag_type}" == "f" ]]; then
+              echo "feature tag"
+              tags="${image_name}:feature-${tag_name}-${distro_friendly_name}"
+            elif [[ "${tag_type}" = "daily" || "${tag_type}" = "d" ]]; then
+              echo "daily build"
+              tags="${tags},${image_name}:daily-${distro_friendly_name}"
+            fi
+          fi
+          echo "Building tags: ["${tags}"]"
+          echo "RELEASE_TAGS=${tags}" >> $GITHUB_OUTPUT
+          echo "BASE_IMAGE=${select_base_image}" >> $GITHUB_OUTPUT
+          echo "BUILD_PLATFORMS=${build_platforms}" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          build-args: |
+            BASE_IMAGE=${{ steps.prepare.outputs.BASE_IMAGE }}
+            BUILD_MODE=${{ matrix.build_mode }}
+            BINARY_MODE=${{ matrix.binary_mode }}
+          platforms: ${{ steps.prepare.outputs.BUILD_PLATFORMS }}
+          push: true
+          tags: ${{ steps.prepare.outputs.RELEASE_TAGS }}
